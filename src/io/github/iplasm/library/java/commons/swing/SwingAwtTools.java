@@ -1,10 +1,7 @@
-package io.github.iplasm.library.java.commons;
+package io.github.iplasm.library.java.commons.swing;
 
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.Window;
-import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import javax.swing.JEditorPane;
@@ -16,6 +13,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import io.github.iplasm.library.java.commons.TextUtils;
 
 public class SwingAwtTools {
 
@@ -135,13 +133,6 @@ public class SwingAwtTools {
       }
     }
     return fosusedWindow == null ? null : fosusedWindow.getFocusOwner();
-  }
-
-  public static void browseURLOrPathViaDesktop(URI uri) throws IOException {
-    Desktop desktop = Desktop.getDesktop();
-    if (Desktop.isDesktopSupported() && desktop.isSupported(Desktop.Action.BROWSE)) {
-      desktop.browse(uri);
-    }
   }
 
   public static String getTrimmedSelectedText(JTextComponent editor) {

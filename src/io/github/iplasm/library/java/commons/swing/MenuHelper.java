@@ -1,4 +1,4 @@
-package io.github.iplasm.library.java.commons;
+package io.github.iplasm.library.java.commons.swing;
 
 import java.util.concurrent.Callable;
 import javax.swing.Box;
@@ -80,6 +80,7 @@ public class MenuHelper {
       actionButton.setEnabled(false);
       runnable.run();
     });
+    actionButton.setFocusable(false);
     return panel;
   }
 
