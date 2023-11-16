@@ -3,7 +3,7 @@ package io.github.iplasm.library.java.commons;
 public class SysUtils {
   public static boolean isNeitherWindowsNorMac() {
     String os = System.getProperty("os.name").toLowerCase();
-    return !os.startsWith("windows") && !os.startsWith("mac");
+    return !isWindows() && !isMacOs();
   }
 
   public static boolean isMacOs() {
