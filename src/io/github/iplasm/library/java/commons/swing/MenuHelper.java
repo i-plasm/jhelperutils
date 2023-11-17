@@ -66,6 +66,9 @@ public class MenuHelper {
         "</body></html>");
   }
 
+  /*
+   * This panel is meant to be added to a FloatingMsgPopup
+   */
   public static JPanel createFloatingActionPanel(String menuText, String name, String buttonText,
       Runnable runnable) {
     Box b1 = Box.createHorizontalBox();
