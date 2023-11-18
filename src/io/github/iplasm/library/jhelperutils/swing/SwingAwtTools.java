@@ -1,4 +1,4 @@
-package io.github.iplasm.library.java.commons.swing;
+package io.github.iplasm.library.jhelperutils.swing;
 
 import java.awt.Component;
 import java.awt.Window;
@@ -13,7 +13,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
-import io.github.iplasm.library.java.commons.TextUtils;
+import io.github.iplasm.library.jhelperutils.TextUtils;
 
 public class SwingAwtTools {
 

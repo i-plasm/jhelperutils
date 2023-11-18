@@ -1,4 +1,4 @@
-package io.github.iplasm.library.java.commons.swing;
+package io.github.iplasm.library.jhelperutils.swing;
 
 import java.util.concurrent.Callable;
 import javax.swing.Box;
