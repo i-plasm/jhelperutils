@@ -1,10 +1,12 @@
 package io.github.iplasm.library.jhelperutils.swing;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.Window;
 import java.util.ArrayList;
 import java.util.Collections;
 import javax.swing.JEditorPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
@@ -140,5 +142,14 @@ public class SwingAwtTools {
     return selectedTxt == null ? "" : selectedTxt.trim();
   }
 
+  public static boolean pointIsInComponent(Point p, Component component) {
+    p = new Point(p);
+    // TODO fix Fix nullpointerex.
+    SwingUtilities.convertPointFromScreen(p, component);
+    if (p.x >= 0 && p.y >= 0 && p.x <= component.getWidth() && p.y <= component.getHeight()) {
+      return true;
+    }
+    return false;
 
+  }
 }

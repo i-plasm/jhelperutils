@@ -1,9 +1,11 @@
 package io.github.iplasm.library.jhelperutils.swing;
 
 import java.util.concurrent.Callable;
+import java.util.function.Supplier;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -85,6 +87,29 @@ public class MenuHelper {
     });
     actionButton.setFocusable(false);
     return panel;
+  }
+
+  public static class DynamicMenu extends JMenu {
+    Supplier<JMenuItem[]> menuItemGenerator;
+
+    public DynamicMenu(String text, Supplier<JMenuItem[]> menuItemGenerator) {
+      super(text);
+      this.menuItemGenerator = menuItemGenerator;
+    }
+
+    public void addDynamicItems() {
+      if (menuItemGenerator.get().length > 0) {
+        this.addSeparator();
+      }
+
+      for (JMenuItem item : menuItemGenerator.get()) {
+        this.add(item);
+      }
+
+      if (menuItemGenerator.get().length > 0) {
+        this.addSeparator();
+      }
+    }
   }
 
 
