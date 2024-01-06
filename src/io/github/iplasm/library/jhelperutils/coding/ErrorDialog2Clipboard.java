@@ -93,7 +93,8 @@ public class ErrorDialog2Clipboard implements PropertyChangeListener {
       Window window = SwingUtilities.getWindowAncestor((Component) evt.getNewValue());
 
       if (window instanceof JDialog
-          && ((JDialog) window).getTitle().equalsIgnoreCase(targetErrorDialogTitle)) {
+          && ((JDialog) window).getTitle().equalsIgnoreCase(targetErrorDialogTitle)
+          && !(((JDialog) window).getTitle().equalsIgnoreCase("ErrorDialog2Clipboard"))) {
 
         JDialog currentDialog = (JDialog) window;
 
