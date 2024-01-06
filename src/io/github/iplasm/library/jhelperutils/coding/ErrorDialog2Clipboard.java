@@ -132,8 +132,7 @@ public class ErrorDialog2Clipboard implements PropertyChangeListener {
 
   public void showCopyToClipboardMessage(String errorString) {
 
-    String msg = "Click 'OK' to copy the previous error message to clipboard:"
-        + System.lineSeparator() + System.lineSeparator()
+    String msg = "Error message detected:" + System.lineSeparator() + System.lineSeparator()
         + (errorString.length() > 100 ? errorString.substring(0, 100) + "..." : errorString);
 
     Window fosusedWindow = null;
@@ -145,9 +144,9 @@ public class ErrorDialog2Clipboard implements PropertyChangeListener {
     String[] options;
 
     if (shouldShowStopMonitoringButton) {
-      options = new String[] {"Yes", "No", "Stop monitoring"};
+      options = new String[] {"Copy to Clipboard", "No", "Stop monitoring"};
     } else {
-      options = new String[] {"Yes", "No"};
+      options = new String[] {"Copy to Clipboard", "No"};
     }
 
     int result = JOptionPane.showOptionDialog(fosusedWindow, msg, "ErrorDialog2Clipboard",
