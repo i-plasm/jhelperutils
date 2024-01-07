@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
  * <p>
  * To stop monitoring: if <code>shouldShowStopMonitoringButton</code> was set to true, the user can
  * stop monitoring via the GUI. In order to stop the monitoring programmatically, invoke
- * <code>removeListener</code>
+ * <code>removeListener()</code>
  */
 public class ErrorDialog2Clipboard implements PropertyChangeListener {
 
@@ -54,12 +54,9 @@ public class ErrorDialog2Clipboard implements PropertyChangeListener {
     if (filteresListeners.size() == 0) {
       ErrorDialog2Clipboard l = new ErrorDialog2Clipboard(targetErrorDialogTitle, true);
       l.activateListener();
-    } else if (filteresListeners.size() == 0) {
-      JOptionPane.showMessageDialog(fosusedWindow, "ErrorDialog2Clipboard is already running",
-          "ErrorDialog2Clipboard", JOptionPane.ERROR_MESSAGE);
     } else {
       JOptionPane.showMessageDialog(fosusedWindow,
-          "There should not be more than one registered ErrorDialog2Clipboard listeners! ",
+          "There should not be more than one registered ErrorDialog2Clipboard listeners!",
           "ErrorDialog2Clipboard", JOptionPane.ERROR_MESSAGE);
     }
   }
@@ -158,6 +155,7 @@ public class ErrorDialog2Clipboard implements PropertyChangeListener {
       if (clipboard == null) {
         JOptionPane.showMessageDialog(fosusedWindow, "Failed to copy to clipboard",
             "ErrorDialog2Clipboard", JOptionPane.ERROR_MESSAGE);
+        return;
       }
       StringSelection sel = new StringSelection(errorString);
       try {
