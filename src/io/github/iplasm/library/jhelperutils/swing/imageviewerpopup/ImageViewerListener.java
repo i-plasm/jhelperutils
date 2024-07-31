@@ -1,0 +1,118 @@
+package io.github.iplasm.library.jhelperutils.swing.imageviewerpopup;
+
+import java.awt.Component;
+import java.awt.KeyboardFocusManager;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.function.Predicate;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+
+public class ImageViewerListener<T extends Component> extends MouseAdapter {
+
+  T component;
+  Timer viewerTimer;
+
+  ActionListener timerAction;
+  private ViewerPopup popup;
+
+  public ImageViewerListener(T component, ViewerPopup popup, Predicate<T> isValidImage) {
+    this.component = component;
+    popup.hookToComponent(component);
+
+    ActionListener timerAction = new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        Point pos = component.getMousePosition();
+        if (pos == null) {
+          return;
+        }
+
+        boolean isValidImagePresent = isValidImage.test(component);
+
+        if (!isValidImagePresent) {
+          if (popup != null) {
+            popup.setVisible(false);
+          }
+          return;
+        }
+        if (popup != null && !popup.isShowing()) {
+          int x = pos.x - popup.getWidth() / 2;
+          int y = pos.y;
+
+          popup.show(component, x, y);
+        }
+
+      }
+    };
+
+    this.viewerTimer = new Timer(500, timerAction);
+
+    class PopupAdapter extends MouseAdapter {
+
+      @Override
+      public void mouseExited(MouseEvent e) {
+        Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
+        boolean isPointContainedInBitmapViewer = p.x >= component.getLocationOnScreen().x
+            && p.x <= (component.getWidth() + component.getLocationOnScreen().x)
+            && p.y >= component.getLocationOnScreen().y
+            && p.y <= (component.getHeight() + component.getLocationOnScreen().y);
+
+        if (!isPointContainedInBitmapViewer && !popup.isCurrentlyDisplayingPreviewTip()) {
+          popup.setVisible(false);
+        }
+      }
+
+    }
+
+    for (MouseListener l : popup.getMouseListeners()) {
+      ;
+      if (PopupAdapter.class.isInstance(l)) {// l instanceof PopupAdapter
+        popup.removeMouseListener(l);
+        break;
+      }
+    }
+    popup.addMouseListener(new PopupAdapter());
+  }
+
+  @Override
+  public void mouseExited(MouseEvent e) {
+    if (viewerTimer != null && viewerTimer.isRunning()) {
+      viewerTimer.stop();
+    }
+
+    Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
+    // SwingUtilities.convertPointFromScreen(p, popup);
+
+    if (popup.isShowing()) {
+      boolean isPointContainedInPopup = p.x >= popup.getLocationOnScreen().x
+          && p.x <= (popup.getWidth() + popup.getLocationOnScreen().x)
+          && p.y >= popup.getLocationOnScreen().y
+          && p.y <= (popup.getHeight() + popup.getLocationOnScreen().y);
+
+      if (!isPointContainedInPopup && !popup.isCurrentlyDisplayingPreviewTip()) {
+        popup.setVisible(false);
+      }
+      return;
+    }
+
+  }
+
+  @Override
+  public void mouseEntered(MouseEvent e) {
+    Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+    boolean isAnotherWindowOnTop = focusOwner != null
+        && SwingUtilities.getWindowAncestor((Component) e.getSource()) != SwingUtilities
+            .getWindowAncestor(focusOwner);
+    if (popup.isShowing() || isAnotherWindowOnTop) {
+      return;
+    }
+    viewerTimer.start();
+    viewerTimer.setRepeats(false);
+  }
+}
