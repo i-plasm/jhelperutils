@@ -20,7 +20,7 @@ public abstract class ImgAWTEventListener<T extends Component> implements AWTEve
 
   @Override
   public void eventDispatched(AWTEvent e) {
-    if (e.getID() == MouseEvent.MOUSE_PRESSED
+    if (e.getID() == MouseEvent.MOUSE_PRESSED && isWindows()
         && e.getSource().getClass().getName()
             .contains("javax.swing.PopupFactory$MediumWeightPopup$MediumWeightComponent")
         && popup.isCurrentlyDisplayingPreviewTip()) {
@@ -56,6 +56,11 @@ public abstract class ImgAWTEventListener<T extends Component> implements AWTEve
     component.addMouseListener(bitmapViewerlistener);
     bitmapViewerlistener.mouseEntered(
         new MouseEvent(component, -1, System.currentTimeMillis(), 0, 0, 0, 0, 0, 0, false, 0));
+  }
+
+  public static boolean isWindows() {
+    String os = System.getProperty("os.name").toLowerCase();
+    return os.startsWith("windows");
   }
 
   protected abstract ViewerPopup<T> createViewerPopup();

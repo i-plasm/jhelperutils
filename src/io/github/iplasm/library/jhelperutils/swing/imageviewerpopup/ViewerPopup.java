@@ -57,7 +57,7 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
 
         JFrame dummyHiddenFrame = getDummyFrame();
 
-        p = new Point(p.x + btnPreview.getBounds().width / 2, p.y
+        p = new Point(p.x + btnPreview.getBounds().width - btnPreview.getBounds().width / 4, p.y
             + btnPreview.getBounds().height / 2 - dummyHiddenFrame.getPreferredSize().height / 2);
         dummyHiddenFrame.dispose();
         return p;
