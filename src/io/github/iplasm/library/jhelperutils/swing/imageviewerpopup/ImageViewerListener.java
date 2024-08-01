@@ -18,10 +18,11 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
   Timer viewerTimer;
 
   ActionListener timerAction;
-  private ViewerPopup popup;
+  private ViewerPopup<T> popup;
 
-  public ImageViewerListener(T component, ViewerPopup popup, Predicate<T> isValidImage) {
+  public ImageViewerListener(T component, ViewerPopup<T> popup, Predicate<T> isValidImage) {
     this.component = component;
+    this.popup = popup;
     popup.hookToComponent(component);
 
     ActionListener timerAction = new ActionListener() {
@@ -52,23 +53,6 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
     };
 
     this.viewerTimer = new Timer(500, timerAction);
-
-    class PopupAdapter extends MouseAdapter {
-
-      @Override
-      public void mouseExited(MouseEvent e) {
-        Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
-        boolean isPointContainedInBitmapViewer = p.x >= component.getLocationOnScreen().x
-            && p.x <= (component.getWidth() + component.getLocationOnScreen().x)
-            && p.y >= component.getLocationOnScreen().y
-            && p.y <= (component.getHeight() + component.getLocationOnScreen().y);
-
-        if (!isPointContainedInBitmapViewer && !popup.isCurrentlyDisplayingPreviewTip()) {
-          popup.setVisible(false);
-        }
-      }
-
-    }
 
     for (MouseListener l : popup.getMouseListeners()) {
       ;
@@ -115,4 +99,23 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
     viewerTimer.start();
     viewerTimer.setRepeats(false);
   }
+
+  class PopupAdapter extends MouseAdapter {
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+      Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
+      boolean isPointContainedInBitmapViewer = p.x >= component.getLocationOnScreen().x
+          && p.x <= (component.getWidth() + component.getLocationOnScreen().x)
+          && p.y >= component.getLocationOnScreen().y
+          && p.y <= (component.getHeight() + component.getLocationOnScreen().y);
+
+      if (!isPointContainedInBitmapViewer && !popup.isCurrentlyDisplayingPreviewTip()) {
+        popup.setVisible(false);
+      }
+    }
+
+
+  }
+
 }
