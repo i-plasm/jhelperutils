@@ -90,16 +90,21 @@ public class MenuHelper {
   }
 
   public static class DynamicMenu extends JMenu {
-    Supplier<JMenuItem[]> menuItemGenerator;
+    private Supplier<JMenuItem[]> menuItemGenerator;
+    private boolean addSeparators;
 
-    public DynamicMenu(String text, Supplier<JMenuItem[]> menuItemGenerator) {
+    public DynamicMenu(String text, Supplier<JMenuItem[]> menuItemGenerator,
+        boolean addSeparators) {
       super(text);
       this.menuItemGenerator = menuItemGenerator;
+      this.addSeparators = addSeparators;
     }
 
     public void addDynamicItems() {
       if (menuItemGenerator.get().length > 0) {
-        this.addSeparator();
+        if (addSeparators) {
+          this.addSeparator();
+        }
       }
 
       for (JMenuItem item : menuItemGenerator.get()) {
@@ -107,7 +112,9 @@ public class MenuHelper {
       }
 
       if (menuItemGenerator.get().length > 0) {
-        this.addSeparator();
+        if (addSeparators) {
+          this.addSeparator();
+        }
       }
     }
   }
