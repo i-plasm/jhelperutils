@@ -1,25 +1,37 @@
 package io.github.iplasm.library.jhelperutils.swing.imageviewerpopup;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GraphicsConfiguration;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 import java.net.URI;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.ToolTipManager;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import io.github.iplasm.library.jhelperutils.swing.HoverButton;
 
 
@@ -29,7 +41,6 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
 
   HoverButton btnPreview;
   T hookedComponent;
-  private boolean isCurrentlyDisplayingPreviewTip = false;
   private String previousImage;
   private String currentImage;
   private String imgBackground;
@@ -46,45 +57,10 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
     btnCopyPath.setToolTipText("Copy Image URL");
 
     // unicode Left-Pointing Magnifying Glass button
-    btnPreview = new HoverButton("<html><p><font size=12>&#128269;</font></p></html>") {
+    btnPreview = new HoverButton("<html><p><font size=12>&#128269;</font></p></html>");
 
-      @Override
-      public Point getToolTipLocation(MouseEvent event) {
-        Point p = btnPreview.getLocationOnScreen();
-        java.awt.MouseInfo.getPointerInfo().getLocation();
-
-        SwingUtilities.convertPointFromScreen(p, btnPreview);
-
-        JFrame dummyHiddenFrame = getDummyFrame();
-
-        p = new Point(p.x + btnPreview.getBounds().width - btnPreview.getBounds().width / 4, p.y
-            + btnPreview.getBounds().height / 2 - dummyHiddenFrame.getPreferredSize().height / 2);
-        dummyHiddenFrame.dispose();
-        return p;
-      }
-
-      private JFrame getDummyFrame() {
-        String previousImage = ViewerPopup.this.previousImage;
-        String currentImage = ViewerPopup.this.currentImage;
-        // if (dummyHiddenFrame != null && previousImage != null &&
-        // currentImage.equals(previousImage)) {
-        // return dummyHiddenFrame;
-        // }
-        ViewerPopup.this.previousImage = currentImage;
-        JLabel label = new JLabel(imageHTML(currentImage));
-        JFrame dummyHiddenFrame = new JFrame();
-        dummyHiddenFrame.add(label);
-        dummyHiddenFrame.pack();
-        return dummyHiddenFrame;
-      }
-
-    };
-
-    btnPreview.addActionListener(
-        l -> previewFullSize(getCurrentImage(), ViewerPopup.this.getImgBackground()));
     btnCopyPath.addActionListener(l -> copyURL());
     btnInfo.addActionListener(l -> displayHelp());
-    final int defaultInitialDelay = ToolTipManager.sharedInstance().getInitialDelay();
 
     MouseAdapter exitAdapter = new MouseAdapter() {
 
@@ -102,8 +78,7 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
                 + getHookedComponent().getLocationOnScreen().y);
         SwingUtilities.convertPointFromScreen(p, popup);
 
-        if (popup != null && !isPointContainedInHookedComp && !popup.getVisibleRect().contains(p)
-            && !isCurrentlyDisplayingPreviewTip) {
+        if (popup != null && !isPointContainedInHookedComp && !popup.getVisibleRect().contains(p)) {
           popup.setVisible(false);
         }
 
@@ -113,45 +88,15 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
     btnPreview.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseEntered(MouseEvent e) {
-        ToolTipManager.sharedInstance().setInitialDelay(0);
-        btnPreview.setToolTipText(imageHTMLWithBgColor(ViewerPopup.this.getCurrentImage(),
-            ViewerPopup.this.getImgBackground()));
-        isCurrentlyDisplayingPreviewTip = true;
+        JFrame hoverWindow = createHoverWindow(ViewerPopup.this.getCurrentImage(),
+            ViewerPopup.this.getImgBackground(), ViewerPopup.this.getSuggstedPreviewLocation(),
+            SwingUtilities.getWindowAncestor(ViewerPopup.this).getGraphicsConfiguration());
+        hoverWindow.setVisible(true);
       };
-
-      @Override
-      public void mouseExited(MouseEvent e) {
-        Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
-        SwingUtilities.convertPointFromScreen(p, btnPreview);
-        if (btnPreview.getVisibleRect().contains(p)) {
-          return;
-        }
-        hidePreviewToolTip(defaultInitialDelay);
-      }
-
     });
 
     btnInfo.addMouseListener(exitAdapter);
     btnCopyPath.addMouseListener(exitAdapter);
-
-    addPopupMenuListener(new PopupMenuListener() {
-
-      @Override
-      public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
-
-      @Override
-      public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-        if (isCurrentlyDisplayingPreviewTip) {
-          hidePreviewToolTip(defaultInitialDelay);
-        }
-
-      }
-
-      @Override
-      public void popupMenuCanceled(PopupMenuEvent e) {
-        hidePreviewToolTip(defaultInitialDelay);
-      }
-    });
 
     this.add(btnPreview);
     this.add(btnCopyPath);
@@ -196,14 +141,6 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
         JOptionPane.INFORMATION_MESSAGE);
   }
 
-  private void hidePreviewToolTip(final int defaultDismissTimeout) {
-    btnPreview.setToolTipText("");
-    ToolTipManager.sharedInstance().mouseMoved(
-        new MouseEvent(btnPreview, -1, System.currentTimeMillis(), 0, 0, 0, 0, 0, 0, false, 0));
-    ToolTipManager.sharedInstance().setInitialDelay(defaultDismissTimeout);
-    isCurrentlyDisplayingPreviewTip = false;
-  };
-
   public void hookToComponent(T component) {
     this.hookedComponent = component;
     String compImg = getImageURI().toString();
@@ -211,10 +148,6 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
     this.currentImage = compImg;
     this.imgBackground = getBackgroundColor();
     setVisible(false);
-  }
-
-  public boolean isCurrentlyDisplayingPreviewTip() {
-    return isCurrentlyDisplayingPreviewTip;
   }
 
   public Component getHookedComponent() {
@@ -239,18 +172,209 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
     return "<html><body style=\"background-color:" + bgColor + ";\">" + str + "</body></html>";
   }
 
-  static void previewFullSize(String imgUrl, String bgColor) {
+  public static Rectangle getMaxWindowBounds(GraphicsConfiguration config) {
+    Rectangle bounds = null;
+    bounds = config.getBounds();
+    Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(config);
+    System.out.println("bounds" + bounds.x + "; " + bounds.y + ";  width:" + bounds.width
+        + "; height: " + bounds.height);
+    System.out.println("insets" + "left: " + insets.left + " ; right: " + insets.right + "; top: "
+        + insets.top + "; bottom: " + insets.bottom);
+    bounds.x += insets.left;
+    bounds.y += insets.top;
+    bounds.width -= insets.left + insets.right;
+    bounds.height -= insets.top + insets.bottom;
+
+
+    return bounds;
+  }
+
+  static JFrame createHoverWindow(String imgUrl, String bgColor, Point suggestedLocation,
+      GraphicsConfiguration config) {
+    String html = imageHTMLWithBgColor(imgUrl, bgColor);
+    JLabel label = new JLabel(html);
+    JFrame frame;
+    JFrame dummyFrame = new JFrame();
+    // frame.setName(PREVIEW_COMP_NAME);
+
+    dummyFrame.setLayout(new FlowLayout(FlowLayout.CENTER));
+    dummyFrame.add(label);
+    dummyFrame.pack();
+    Rectangle maxBounds = getMaxWindowBounds(config);
+    Rectangle dummyFrameBounds = dummyFrame.getBounds();
+    boolean isImgShowingFully = dummyFrame.getBounds().width < maxBounds.width
+        && dummyFrame.getBounds().height < maxBounds.height;
+    dummyFrame.dispose();
+
+    if (!isImgShowingFully) {
+      frame = new JFrame();
+      // frame.setName(PREVIEW_COMP_NAME);
+      final JPanel panel = new JPanel() {
+        @Override
+        public Dimension getPreferredSize() {
+          return new Dimension(label.getBounds().width, label.getBounds().height);
+        }
+
+      };
+
+      panel.add(label);
+      JScrollPane scrollPane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+          JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+      label.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+          int width = frame.getWidth();
+          int height = frame.getHeight();
+          Point location = frame.getLocation();
+          frame.setVisible(false);
+          frame.dispose();
+          previewFullSize(imgUrl, bgColor, width, height, location);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+          if (!label.isShowing()) {
+            return;
+          }
+          if ((e.getLocationOnScreen().y < label.getLocationOnScreen().y)
+              || (e.getLocationOnScreen().y < scrollPane.getViewportBorderBounds().y)) {
+            frame.setVisible(false);
+            frame.dispose();
+          }
+        }
+
+      });
+
+      frame.addWindowListener(new WindowAdapter() {
+
+        @Override
+        public void windowDeactivated(WindowEvent e) {
+          if (frame.isVisible()) {
+            frame.setVisible(false);
+            frame.dispose();
+          }
+        }
+      });
+      frame.addWindowFocusListener(new WindowFocusListener() {
+        @Override
+        public void windowLostFocus(WindowEvent e) {
+          if (frame.isVisible()) {
+            frame.setVisible(false);
+            frame.dispose();
+          }
+        }
+
+        @Override
+        public void windowGainedFocus(WindowEvent e) {}
+      });
+
+      frame.add(scrollPane);
+      frame.setUndecorated(true);
+      frame.setSize(maxBounds.width, maxBounds.height);
+      // frame.pack();
+      frame.setLocation(0, 0);
+    } else {
+      frame = new JFrame();
+      // frame.setName(PREVIEW_COMP_NAME);
+      frame.setUndecorated(true);
+      frame.setLayout(new FlowLayout(FlowLayout.CENTER));
+      frame.add(label);
+
+
+      int x = maxBounds.width > dummyFrameBounds.width + suggestedLocation.x ? suggestedLocation.x
+          : maxBounds.width - dummyFrameBounds.width;
+      int y = maxBounds.height > dummyFrameBounds.height + suggestedLocation.y ? suggestedLocation.y
+          : maxBounds.height - dummyFrameBounds.height;
+
+      frame.setLocation(x, y);
+      frame.pack();
+
+      label.addMouseListener(new MouseAdapter() {
+        @Override
+        public void mouseExited(MouseEvent e) {
+          frame.setVisible(false);
+          frame.dispose();
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+          Point location = frame.getLocation();
+          frame.setVisible(false);
+          frame.dispose();
+          previewFullSize(imgUrl, bgColor, maxBounds, location);
+        }
+
+      });
+
+    }
+
+    addEscapeListener(frame);
+    return frame;
+  }
+
+  public Point getSuggstedPreviewLocation() {
+    return btnPreview.getLocationOnScreen();
+  }
+
+  public static void addEscapeListener(JFrame frame) {
+    Action dispatchClosing = new AbstractAction() {
+      @Override
+      public void actionPerformed(ActionEvent event) {
+        frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+      }
+    };
+
+    KeyStroke escape = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
+    JRootPane rootPane = frame.getRootPane();
+    rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(escape, "closeWindow");
+    rootPane.getActionMap().put("closeWindow", dispatchClosing);
+  }
+
+  static void previewFullSize(String imgUrl, String bgColor, Rectangle maxBounds,
+      Point suggestedLocation) {
     String html = imageHTMLWithBgColor(imgUrl, bgColor);
     JLabel label = new JLabel(html);
     JFrame frame;
     frame = new JFrame();
     frame.setName(PREVIEW_COMP_NAME);
-    frame.setLayout(new FlowLayout(FlowLayout.CENTER));
-    frame.add(label);
+    final JPanel panel = new JPanel();
+    panel.add(label);
+    JScrollPane scrollPane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    frame.add(scrollPane);
+    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    addEscapeListener(frame);
     frame.pack();
-    frame.setLocationRelativeTo(null);
+    int x = maxBounds.width > frame.getBounds().width + suggestedLocation.x ? suggestedLocation.x
+        : maxBounds.width - frame.getBounds().width;
+    int y = maxBounds.height > frame.getBounds().height + suggestedLocation.y ? suggestedLocation.y
+        : maxBounds.height - frame.getBounds().height;
+
+    frame.setLocation(new Point(x, y));
     frame.setVisible(true);
   }
+
+  static void previewFullSize(String imgUrl, String bgColor, int width, int height,
+      Point location) {
+    String html = imageHTMLWithBgColor(imgUrl, bgColor);
+    JLabel label = new JLabel(html);
+    JFrame frame;
+    frame = new JFrame();
+    frame.setName(PREVIEW_COMP_NAME);
+    final JPanel panel = new JPanel();
+    panel.add(label);
+    JScrollPane scrollPane = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+        JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    frame.add(scrollPane);
+    frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    addEscapeListener(frame);
+    frame.pack();
+    frame.setSize(width, height);
+    frame.setLocation(location);
+    frame.setVisible(true);
+  }
+
 
   protected abstract String getBackgroundColor();
 

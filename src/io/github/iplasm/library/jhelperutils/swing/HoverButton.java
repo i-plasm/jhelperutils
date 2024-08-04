@@ -5,6 +5,8 @@ import java.awt.event.MouseAdapter;
 import javax.swing.JButton;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 public class HoverButton extends JButton {
   public HoverButton(String text) {
@@ -27,6 +29,19 @@ public class HoverButton extends JButton {
       public void mouseExited(java.awt.event.MouseEvent evt) {
         setBackground(UIManager.getColor("control"));
       }
+    });
+
+    addAncestorListener(new AncestorListener() {
+      @Override
+      public void ancestorRemoved(AncestorEvent event) {
+        setBackground(UIManager.getColor("control"));
+      }
+
+      @Override
+      public void ancestorMoved(AncestorEvent event) {}
+
+      @Override
+      public void ancestorAdded(AncestorEvent event) {}
     });
   }
 }

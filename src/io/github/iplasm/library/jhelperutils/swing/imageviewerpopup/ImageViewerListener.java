@@ -79,7 +79,7 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
           && p.y >= popup.getLocationOnScreen().y
           && p.y <= (popup.getHeight() + popup.getLocationOnScreen().y);
 
-      if (!isPointContainedInPopup && !popup.isCurrentlyDisplayingPreviewTip()) {
+      if (!isPointContainedInPopup) {
         popup.setVisible(false);
       }
       return;
@@ -93,7 +93,7 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
     boolean isAnotherWindowOnTop = focusOwner != null
         && SwingUtilities.getWindowAncestor((Component) e.getSource()) != SwingUtilities
             .getWindowAncestor(focusOwner);
-    if (popup.isShowing() || isAnotherWindowOnTop) {
+    if (popup.isShowing() || isAnotherWindowOnTop || focusOwner == null) {
       return;
     }
     viewerTimer.start();
@@ -104,13 +104,16 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
 
     @Override
     public void mouseExited(MouseEvent e) {
+      if (!component.isShowing()) {
+        return;
+      }
       Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
       boolean isPointContainedInBitmapViewer = p.x >= component.getLocationOnScreen().x
           && p.x <= (component.getWidth() + component.getLocationOnScreen().x)
           && p.y >= component.getLocationOnScreen().y
           && p.y <= (component.getHeight() + component.getLocationOnScreen().y);
 
-      if (!isPointContainedInBitmapViewer && !popup.isCurrentlyDisplayingPreviewTip()) {
+      if (!isPointContainedInBitmapViewer) {
         popup.setVisible(false);
       }
     }

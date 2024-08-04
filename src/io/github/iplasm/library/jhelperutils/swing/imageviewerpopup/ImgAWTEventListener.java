@@ -20,14 +20,6 @@ public abstract class ImgAWTEventListener<T extends Component> implements AWTEve
 
   @Override
   public void eventDispatched(AWTEvent e) {
-    if (e.getID() == MouseEvent.MOUSE_PRESSED && isWindows()
-        && e.getSource().getClass().getName()
-            .contains("javax.swing.PopupFactory$MediumWeightPopup$MediumWeightComponent")
-        && popup.isCurrentlyDisplayingPreviewTip()) {
-      ViewerPopup.previewFullSize(popup.getCurrentImage(), popup.getImgBackground());
-      return;
-    }
-
     Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
     boolean isAnotherWindowOnTop = focusOwner != null
         && SwingUtilities.getWindowAncestor((Component) e.getSource()) != SwingUtilities
