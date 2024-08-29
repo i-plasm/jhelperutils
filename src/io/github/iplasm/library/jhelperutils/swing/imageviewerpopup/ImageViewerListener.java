@@ -14,21 +14,21 @@ import javax.swing.Timer;
 
 public class ImageViewerListener<T extends Component> extends MouseAdapter {
 
-  T component;
-  Timer viewerTimer;
-
-  ActionListener timerAction;
+  private T component;
+  private Timer viewerTimer;
   private ViewerPopup<T> popup;
 
   public ImageViewerListener(T component, ViewerPopup<T> popup, Predicate<T> isValidImage) {
     this.component = component;
     this.popup = popup;
     popup.hookToComponent(component);
+    this.viewerTimer = new Timer(200, null);
 
     ActionListener timerAction = new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
+        viewerTimer.stop();
         Point pos = component.getMousePosition();
         if (pos == null) {
           return;
@@ -52,11 +52,10 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
       }
     };
 
-    this.viewerTimer = new Timer(500, timerAction);
+    this.viewerTimer.addActionListener(timerAction);
 
     for (MouseListener l : popup.getMouseListeners()) {
-      ;
-      if (PopupAdapter.class.isInstance(l)) {// l instanceof PopupAdapter
+      if (PopupAdapter.class.isInstance(l)) {
         popup.removeMouseListener(l);
         break;
       }
@@ -66,10 +65,6 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
 
   @Override
   public void mouseExited(MouseEvent e) {
-    if (viewerTimer != null && viewerTimer.isRunning()) {
-      viewerTimer.stop();
-    }
-
     Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
     // SwingUtilities.convertPointFromScreen(p, popup);
 
