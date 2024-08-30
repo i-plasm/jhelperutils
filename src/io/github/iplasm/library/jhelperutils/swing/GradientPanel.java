@@ -60,10 +60,9 @@ public class GradientPanel extends JPanel {
 
     int totalWidth = getWidth();
     int totalHeight = getHeight();
-    // Dimension arcs = new Dimension(borderCurveRadius, borderCurveRadius);
 
     // Drawing shadow
-    g2d.setColor(new Color(0, 0, 0, 0.05f)); //
+    g2d.setColor(new Color(0, 0, 0, 0.05f));
     g2d.fillRoundRect(0 + shadowOffset + shadowThickness, 0 + shadowOffset + shadowThickness,
         totalWidth - 1 - shadowOffset - shadowThickness,
         totalHeight - 1 - shadowOffset - shadowThickness, borderCurveRadius, borderCurveRadius);
