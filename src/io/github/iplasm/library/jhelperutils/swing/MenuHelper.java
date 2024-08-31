@@ -47,16 +47,16 @@ public class MenuHelper {
   }
 
   public static JMenuItem createHeaderNoticeMenuItem(String message, String title) {
-    message = "<html><body width='600px'; style=\"font-size: 12px\">"
-        + "[x CLOSE]&nbsp;&nbsp;&nbsp;&nbsp;" + title + "<br><br>" + message + "<br><br>"
-        + "</body></html>";
+    message = "<html><body width='600px'; style=\"font-size: 12px\">" +
+        "[x CLOSE]&nbsp;&nbsp;&nbsp;&nbsp;" + title + "<br><br>" + message + "<br><br>" +
+        "</body></html>";
     JMenuItem menuItem = new JMenuItem(message);
     return menuItem;
   }
 
   public static JMenuItem createContentNoticeMenuItem(String message, String title) {
-    message = "<html><body width='600px'; style=\"font-size: 12px\">" + "<br>" + title + "<br><br>"
-        + message + "<br><br>" + "</body></html>";
+    message = "<html><body width='600px'; style=\"font-size: 12px\">" + "<br>" + title +
+        "<br><br>" + message + "<br><br>" + "</body></html>";
     JMenuItem menuItem = new JMenuItem(message);
     return menuItem;
   }

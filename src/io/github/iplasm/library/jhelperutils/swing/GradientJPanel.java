@@ -7,7 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import javax.swing.JPanel;
 
-public class GradientPanel extends JPanel {
+public class GradientJPanel extends JPanel {
 
   private Color firstColor = Color.MAGENTA;
   private Color secondColor = Color.BLUE;
@@ -50,7 +50,7 @@ public class GradientPanel extends JPanel {
     this.shadowThickness = shadowThickness;
   }
 
-  public GradientPanel() {}
+  public GradientJPanel() {}
 
   @Override
   protected void paintComponent(Graphics g) {

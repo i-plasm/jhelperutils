@@ -20,6 +20,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.BorderFactory;
@@ -35,7 +36,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import io.github.iplasm.library.jhelperutils.swing.GradientPanel;
+import io.github.iplasm.library.jhelperutils.swing.GradientJPanel;
 
 public class SwingNotifications {
 
@@ -55,10 +56,13 @@ public class SwingNotifications {
   private final JTextArea callerAppPane;
   private final JTextArea subjectPane;
   private final Timer timer;
-  private final GradientPanel panel;
+  private final GradientJPanel panel;
   private final Location location = Location.TOP_RIGHT;
   private final JLabel expandLabel;
   private final JPanel glass;
+
+  private int calculatedMinHeight;
+  private boolean isMaximizedState;
 
   private static final int SECONDS = 5;
   private static final int WIDTH = 300;
@@ -67,7 +71,7 @@ public class SwingNotifications {
   private static final Color DEFAULT_FIRST_COLOR = Color.decode("#9adbfe");
   private static final Color DEFAULT_SECOND_COLOR = Color.WHITE;
   private static final Color LIGHT_FONT_COLOR = Color.WHITE.darker();
-  private static final Color DARK_FONT_COLOR = new java.awt.Color(75, 75, 75);;
+  private static final Color DARK_FONT_COLOR = new Color(75, 75, 75);;
 
   private static SwingNotifications instance;
   private static final List<NotificationData> NOTIFICATIONS_LOG = new ArrayList<>();
@@ -93,16 +97,19 @@ public class SwingNotifications {
     auxFrame = new JFrame();
     auxFrame.setUndecorated(true);
     auxFrame.setAlwaysOnTop(true);
+    auxFrame.setAutoRequestFocus(false);
     auxFrame.setLocationRelativeTo(null);
     auxFrame.setFocusableWindowState(false);
 
     messagePane = new JTextArea();
     subjectPane = new JTextArea();
     callerAppPane = new JTextArea();
-    JSeparator separator = new javax.swing.JSeparator(SwingConstants.HORIZONTAL);
-    separator.setPreferredSize(new Dimension(1, 1));
 
-    panel = new GradientPanel();
+    JSeparator separator = new javax.swing.JSeparator(SwingConstants.HORIZONTAL);
+    separator.setPreferredSize(new Dimension(0, 2));
+    separator.setOpaque(true);
+
+    panel = new GradientJPanel();
     panel.setFirstColor(DEFAULT_FIRST_COLOR);
     panel.setSecondColor(DEFAULT_SECOND_COLOR);
     panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
@@ -119,6 +126,9 @@ public class SwingNotifications {
     backgroundPanel.add(separator);
     backgroundPanel.add(Box.createRigidArea(new Dimension(0, 5)));
 
+    messagePane.setMargin(new Insets(0, 0, 0, 0));
+    subjectPane.setMargin(new Insets(0, 0, 0, 0));
+    callerAppPane.setMargin(new Insets(0, 0, 0, 0));
     messagePane.setLineWrap(true);
     messagePane.setWrapStyleWord(true);
     messagePane.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -133,6 +143,7 @@ public class SwingNotifications {
     subjectPane.setOpaque(false);
 
     separator.setBackground(Color.LIGHT_GRAY);
+    separator.setForeground(Color.LIGHT_GRAY);
 
     if (liberationFont != null) {
       callerAppPane.setFont(liberationFont.deriveFont(Font.BOLD, 12));
@@ -236,10 +247,20 @@ public class SwingNotifications {
     launchNotification(text, caption, callerApp, type, 0, true);
   }
 
+  private void contractNotification(String text, String caption, String callerApp,
+      MessageType type) {
+    launchNotification(text, caption, callerApp, type, 80, true);
+  }
+
   private void launchNotification(String text, String caption, String callerApp, MessageType type,
       int truncateSize, boolean isReshowOfNotification) {
     timer.stop();
+    if (truncateSize > 0 || !isReshowOfNotification) {
+      auxFrame.setVisible(false);
+      auxFrame.dispose();
+    }
     if (!isReshowOfNotification) {
+      isMaximizedState = false;
       NotificationData.add(text, caption, callerApp, new Date(), type);
     }
 
@@ -259,11 +280,19 @@ public class SwingNotifications {
       subjectPane.setVisible(true);
     }
 
-    auxFrame.pack();
-
-    auxFrame.setPreferredSize(new Dimension(WIDTH, (int) panel.getMinimumSize().getHeight()));
-    auxFrame.setMinimumSize(new Dimension(WIDTH, (int) panel.getMinimumSize().getHeight()));
-    auxFrame.setSize(new Dimension(WIDTH, (int) panel.getMinimumSize().getHeight()));
+    if (calculatedMinHeight == 0) {
+      auxFrame.pack();
+      calculatedMinHeight = (int) panel.getMinimumSize().getHeight();
+    }
+    if (truncateSize == 0) {
+      auxFrame.pack();
+      auxFrame.setPreferredSize(new Dimension(WIDTH, (int) panel.getMinimumSize().getHeight()));
+      auxFrame.setSize(new Dimension(WIDTH, (int) panel.getMinimumSize().getHeight()));
+    } else {
+      auxFrame.setMinimumSize(new Dimension(WIDTH, calculatedMinHeight));
+      auxFrame.setPreferredSize(new Dimension(WIDTH, calculatedMinHeight));
+      auxFrame.setSize(new Dimension(WIDTH, calculatedMinHeight));
+    }
 
     NotificationPosition pos = new NotificationPosition(location,
         new Dimension(WIDTH, auxFrame.getHeight()), auxFrame.getGraphicsConfiguration());
@@ -281,7 +310,13 @@ public class SwingNotifications {
         boolean isInsideAppTitle = isPointInsideComponent(e, callerAppPane);
         boolean isInsideCaption = isPointInsideComponent(e, subjectPane);
         if (isInsideExpandButton) {
-          expandNotification(text, caption, callerApp, type);
+          if (!isMaximizedState) {
+            isMaximizedState = true;
+            expandNotification(text, caption, callerApp, type);
+          } else {
+            isMaximizedState = false;
+            contractNotification(text, caption, callerApp, type);
+          }
         } else if (isInsideCaption) {
           displayLog();
         } else {
@@ -361,8 +396,8 @@ public class SwingNotifications {
 
     @Override
     public String toString() {
-      return "\n" + "DATE: " + date.toString() + "\n" + "CALLER: " + callerApp + "\n" + "CAPTION: "
-          + caption + "\n" + "TEXT: " + text;
+      return "\n" + "DATE: " + date.toString() + "\n" + "CALLER: " + callerApp + "\n" +
+          "CAPTION: " + caption + "\n" + "TEXT: " + "\n" + text;
     }
 
     public static List<NotificationData> getSessionLog() {
@@ -382,8 +417,9 @@ public class SwingNotifications {
     }
 
 
-    public static NotificationData getLatestNotification() {
-      return NOTIFICATIONS_LOG.get(0);
+    public static Optional<NotificationData> getLatestNotification() {
+      return NOTIFICATIONS_LOG.size() > 0 ? Optional.of(NOTIFICATIONS_LOG.get(0))
+          : Optional.empty();
     }
 
     public MessageType getType() {
@@ -448,9 +484,15 @@ public class SwingNotifications {
 
 
   public void showLatestNotification() {
-    NotificationData lastest = NotificationData.getLatestNotification();
-    launchNotification(lastest.getText(), lastest.getCaption(), lastest.getCallerApp(),
-        lastest.getType(), 80, true);
+    Optional<NotificationData> latest = NotificationData.getLatestNotification();
+    if (latest.isPresent()) {
+      NotificationData data = latest.get();
+      launchNotification(data.getText(), data.getCaption(), data.getCallerApp(), data.getType(), 80,
+          true);
+    } else {
+      JOptionPane.showMessageDialog(null,
+          "No notifications have been sent in this session so far.");
+    }
   }
 
   public void setGradientColors(Color firstColor, Color secondColor, MessageType infoMessageType) {

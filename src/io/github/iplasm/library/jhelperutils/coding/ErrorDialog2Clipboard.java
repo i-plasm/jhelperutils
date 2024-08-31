@@ -89,14 +89,14 @@ public class ErrorDialog2Clipboard implements PropertyChangeListener {
       // Detecting a newly opened and focused error dialog
       Window window = SwingUtilities.getWindowAncestor((Component) evt.getNewValue());
 
-      if (window instanceof JDialog
-          && ((JDialog) window).getTitle().equalsIgnoreCase(targetErrorDialogTitle)
-          && !(((JDialog) window).getTitle().equalsIgnoreCase("ErrorDialog2Clipboard"))) {
+      if (window instanceof JDialog &&
+          ((JDialog) window).getTitle().equalsIgnoreCase(targetErrorDialogTitle) &&
+          !(((JDialog) window).getTitle().equalsIgnoreCase("ErrorDialog2Clipboard"))) {
 
         JDialog currentDialog = (JDialog) window;
 
-        if (currentDialog.getContentPane().getComponentCount() == 1
-            && currentDialog.getContentPane().getComponent(0) instanceof JOptionPane) {
+        if (currentDialog.getContentPane().getComponentCount() == 1 &&
+            currentDialog.getContentPane().getComponent(0) instanceof JOptionPane) {
 
           JOptionPane joptionPane = (JOptionPane) currentDialog.getContentPane().getComponent(0);
           if (joptionPane.getMessageType() == JOptionPane.ERROR_MESSAGE) {
@@ -130,8 +130,8 @@ public class ErrorDialog2Clipboard implements PropertyChangeListener {
 
   public void showCopyToClipboardMessage(String errorString) {
 
-    String msg = "Error message detected:" + System.lineSeparator() + System.lineSeparator()
-        + (errorString.length() > 100 ? errorString.substring(0, 100) + "..." : errorString);
+    String msg = "Error message detected:" + System.lineSeparator() + System.lineSeparator() +
+        (errorString.length() > 100 ? errorString.substring(0, 100) + "..." : errorString);
 
     Window fosusedWindow = null;
     for (Window w : Window.getWindows()) {

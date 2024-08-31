@@ -69,10 +69,10 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
     // SwingUtilities.convertPointFromScreen(p, popup);
 
     if (popup.isShowing()) {
-      boolean isPointContainedInPopup = p.x >= popup.getLocationOnScreen().x
-          && p.x <= (popup.getWidth() + popup.getLocationOnScreen().x)
-          && p.y >= popup.getLocationOnScreen().y
-          && p.y <= (popup.getHeight() + popup.getLocationOnScreen().y);
+      boolean isPointContainedInPopup = p.x >= popup.getLocationOnScreen().x &&
+          p.x <= (popup.getWidth() + popup.getLocationOnScreen().x) &&
+          p.y >= popup.getLocationOnScreen().y &&
+          p.y <= (popup.getHeight() + popup.getLocationOnScreen().y);
 
       if (!isPointContainedInPopup) {
         popup.setVisible(false);
@@ -85,8 +85,8 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
   @Override
   public void mouseEntered(MouseEvent e) {
     Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
-    boolean isAnotherWindowOnTop = focusOwner != null
-        && SwingUtilities.getWindowAncestor((Component) e.getSource()) != SwingUtilities
+    boolean isAnotherWindowOnTop = focusOwner != null &&
+        SwingUtilities.getWindowAncestor((Component) e.getSource()) != SwingUtilities
             .getWindowAncestor(focusOwner);
     if (popup.isShowing() || isAnotherWindowOnTop || focusOwner == null) {
       return;
@@ -103,10 +103,10 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
         return;
       }
       Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
-      boolean isPointContainedInBitmapViewer = p.x >= component.getLocationOnScreen().x
-          && p.x <= (component.getWidth() + component.getLocationOnScreen().x)
-          && p.y >= component.getLocationOnScreen().y
-          && p.y <= (component.getHeight() + component.getLocationOnScreen().y);
+      boolean isPointContainedInBitmapViewer = p.x >= component.getLocationOnScreen().x &&
+          p.x <= (component.getWidth() + component.getLocationOnScreen().x) &&
+          p.y >= component.getLocationOnScreen().y &&
+          p.y <= (component.getHeight() + component.getLocationOnScreen().y);
 
       if (!isPointContainedInBitmapViewer) {
         popup.setVisible(false);

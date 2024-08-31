@@ -70,12 +70,13 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
         JPopupMenu popup = ViewerPopup.this;
 
         Point p = java.awt.MouseInfo.getPointerInfo().getLocation();
-        boolean isPointContainedInHookedComp = p.x >= getHookedComponent().getLocationOnScreen().x
-            && p.x <= (getHookedComponent().getWidth()
-                + getHookedComponent().getLocationOnScreen().x)
-            && p.y >= getHookedComponent().getLocationOnScreen().y
-            && p.y <= (getHookedComponent().getHeight()
-                + getHookedComponent().getLocationOnScreen().y);
+        boolean isPointContainedInHookedComp =
+            p.x >= getHookedComponent().getLocationOnScreen().x &&
+                p.x <= (getHookedComponent().getWidth() +
+                    getHookedComponent().getLocationOnScreen().x) &&
+                p.y >= getHookedComponent().getLocationOnScreen().y &&
+                p.y <= (getHookedComponent().getHeight() +
+                    getHookedComponent().getLocationOnScreen().y);
         SwingUtilities.convertPointFromScreen(p, popup);
 
         if (popup != null && !isPointContainedInHookedComp && !popup.getVisibleRect().contains(p)) {
@@ -198,8 +199,8 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
     dummyFrame.pack();
     Rectangle maxBounds = getMaxWindowBounds(config);
     Rectangle dummyFrameBounds = dummyFrame.getBounds();
-    boolean isImgShowingFully = dummyFrame.getBounds().width < maxBounds.width
-        && dummyFrame.getBounds().height < maxBounds.height;
+    boolean isImgShowingFully = dummyFrame.getBounds().width < maxBounds.width &&
+        dummyFrame.getBounds().height < maxBounds.height;
     dummyFrame.dispose();
 
     if (!isImgShowingFully) {
@@ -223,8 +224,8 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
           if (!panel.isShowing()) {
             return;
           }
-          if ((e.getLocationOnScreen().y < panel.getLocationOnScreen().y)
-              || (e.getLocationOnScreen().y < scrollPane.getViewportBorderBounds().y)) {
+          if ((e.getLocationOnScreen().y < panel.getLocationOnScreen().y) ||
+              (e.getLocationOnScreen().y < scrollPane.getViewportBorderBounds().y)) {
             frame.setVisible(false);
             frame.dispose();
           }
@@ -248,8 +249,8 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
           if (!label.isShowing()) {
             return;
           }
-          if ((e.getLocationOnScreen().y < label.getLocationOnScreen().y)
-              || (e.getLocationOnScreen().y < scrollPane.getViewportBorderBounds().y)) {
+          if ((e.getLocationOnScreen().y < label.getLocationOnScreen().y) ||
+              (e.getLocationOnScreen().y < scrollPane.getViewportBorderBounds().y)) {
             frame.setVisible(false);
             frame.dispose();
           }
