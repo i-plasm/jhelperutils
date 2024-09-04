@@ -12,6 +12,7 @@ import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -95,9 +96,10 @@ public class SwingNotifications {
     }
 
     auxFrame = new JFrame();
+    auxFrame.setType(Window.Type.POPUP);
     auxFrame.setUndecorated(true);
     auxFrame.setAlwaysOnTop(true);
-    auxFrame.setAutoRequestFocus(false);
+    auxFrame.setAutoRequestFocus(true);
     auxFrame.setLocationRelativeTo(null);
     auxFrame.setFocusableWindowState(false);
 
@@ -255,7 +257,7 @@ public class SwingNotifications {
   private void launchNotification(String text, String caption, String callerApp, MessageType type,
       int truncateSize, boolean isReshowOfNotification) {
     timer.stop();
-    if (truncateSize > 0 || !isReshowOfNotification) {
+    if (auxFrame.isVisible() && (truncateSize > 0 || !isReshowOfNotification)) {
       auxFrame.setVisible(false);
       auxFrame.dispose();
     }

@@ -20,11 +20,11 @@ public abstract class ImgAWTEventListener<T extends Component> implements AWTEve
 
   @Override
   public void eventDispatched(AWTEvent e) {
-    Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
     if (!(e.getSource() instanceof Component)) {
       return;
     }
 
+    Component focusOwner = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
     boolean isAnotherWindowOnTop = focusOwner != null &&
         SwingUtilities.getWindowAncestor((Component) e.getSource()) != SwingUtilities
             .getWindowAncestor(focusOwner);
@@ -35,12 +35,10 @@ public abstract class ImgAWTEventListener<T extends Component> implements AWTEve
     Component component = (Component) e.getSource();
 
     if (popup.hookedComponent != null && popup.hookedComponent != component) {
-      if (popup.hookedComponent.getMouseListeners() != null) {
-        for (MouseListener l : popup.hookedComponent.getMouseListeners()) {
-          if (l instanceof ImageViewerListener) {
-            popup.hookedComponent.removeMouseListener(l);
-            break;
-          }
+      for (MouseListener l : popup.hookedComponent.getMouseListeners()) {
+        if (l instanceof ImageViewerListener) {
+          popup.hookedComponent.removeMouseListener(l);
+          break;
         }
       }
     } else if (popup.hookedComponent != null && popup.hookedComponent == component) {

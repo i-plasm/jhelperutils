@@ -16,9 +16,9 @@ public class ImageViewerListener<T extends Component> extends MouseAdapter {
 
   private T component;
   private Timer viewerTimer;
-  private ViewerPopup<T> popup;
+  private ViewerPopup popup;
 
-  public ImageViewerListener(T component, ViewerPopup<T> popup, Predicate<T> isValidImage) {
+  public ImageViewerListener(T component, ViewerPopup popup, Predicate<T> isValidImage) {
     this.component = component;
     this.popup = popup;
     popup.hookToComponent(component);
