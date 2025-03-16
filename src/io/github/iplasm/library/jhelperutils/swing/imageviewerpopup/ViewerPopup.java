@@ -91,7 +91,8 @@ public abstract class ViewerPopup<T extends Component> extends JPopupMenu {
       public void mouseEntered(MouseEvent e) {
         JFrame hoverWindow = createHoverWindow(ViewerPopup.this.getCurrentImage(),
             ViewerPopup.this.getImgBackground(), ViewerPopup.this.getSuggstedPreviewLocation(),
-            SwingUtilities.getWindowAncestor(ViewerPopup.this).getGraphicsConfiguration());
+            SwingUtilities.getWindowAncestor(ViewerPopup.this.getHookedComponent())
+                .getGraphicsConfiguration());
         hoverWindow.setVisible(true);
       };
     });
